@@ -1,86 +1,448 @@
-# SearchNova — Django Web Search Engine
+# 🔎 SearchNova — AI-Powered Web Search Engine
 
-SearchNova is a local, portfolio-ready search engine prototype built with Django. It includes a search UI, searchable page index, keyword relevance ranking, query history, a robots.txt-aware crawler, seed URL management, and Django admin.
+### Discover the Web. Search Smarter.
 
-> Scope: this is a focused crawler/index for a small set of public websites, not a full copy of Google's global index. Crawl only sites you are allowed to access. Respect robots.txt, terms of service, and rate limits.
+SearchNova is a Python and Django-based web search engine that combines hybrid search, custom web crawling, locally running Artificial Intelligence, search analytics, and voice-based search in one platform.
 
-## Requirements
-- Windows 10/11
-- Python 3.10+ (Python 3.11 or 3.12 recommended)
-- Internet connection for crawling public pages
+It allows users to search indexed web pages, retrieve external results through DuckDuckGo fallback, and generate AI-powered overviews using Ollama and Llama 3.2.
 
-## Run on Windows (Command Prompt)
-1. Extract the ZIP to a folder such as `C:\Users\DELL\Desktop\SearchNova`.
-2. Open Command Prompt in that folder.
-3. Create a virtual environment:
-   ```bat
-   py -m venv .venv
-   .venv\Scripts\activate
-   ```
-4. Install packages:
-   ```bat
-   python -m pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-5. Create database tables and an admin account:
-   ```bat
-   python manage.py migrate
-   python manage.py createsuperuser
-   ```
-6. Load starter records so searches return sample results immediately:
-   ```bat
-   python manage.py load_demo_index
-   ```
-7. Start the development server:
-   ```bat
-   python manage.py runserver
-   ```
-8. Open `http://127.0.0.1:8000/` in your browser. Admin: `http://127.0.0.1:8000/admin/`.
+---
 
-The starter records point to official documentation sites and are sample index entries for testing. They are not a live crawl. Use the crawler below to fetch permitted live page content.
+## 🚀 Project Highlights
 
-## Add pages to the index
-1. Sign in at `/admin/`.
-2. Under **Search → Crawl seeds**, add a public HTTP/HTTPS URL and save it.
-3. Run:
-   ```bat
-   python manage.py crawl_sites --max-pages 10
-   ```
-4. Return to the home page and search for words that occur on those pages.
+| Feature | Technology |
+|---|---|
+| Hybrid Search | Django + DuckDuckGo |
+| AI Overview | Ollama + Llama 3.2 |
+| Web Crawling | Python |
+| Search Indexing | Django ORM |
+| Search Analytics | Django + SQLite |
+| Smart Suggestions | JavaScript |
+| Voice Search | Web Speech API |
+| Admin Management | Django Admin |
 
-The crawler checks robots.txt, limits pages per seed, restricts crawling to the seed's hostname, uses a request timeout, and skips non-public/private IP destinations. Start with a small `--max-pages` value.
+---
 
-## Included features
-- Responsive SearchNova homepage and results page
-- Query normalization and basic relevance scoring
-- Indexed page title, URL, description, body text, and crawl timestamp
-- Search history for analytics
-- Crawl seeds editable in Django admin
-- Management command for controlled crawling
-- Django admin for indexed pages and search history
-- Basic security defaults and CSRF protection
+## ✨ Powerful Features
 
-## Current limitations / next upgrades
-- No global internet index, distributed crawler, PageRank, or image/news verticals yet.
-- SQLite and simple text matching are intended for local demonstration.
-- For production, add robust SSRF/DNS-rebinding defenses, background jobs, crawl scheduling, deduplication by canonical URL/content hash, language detection, rate limiting, tests, monitoring, and PostgreSQL full-text search.
+### 1. Hybrid Search Engine
 
+- Search web pages from the internal database.
+- DuckDuckGo API fallback when local results are unavailable.
+- Support for multiple search sources.
+- Search relevance scoring.
+- Title and description matching.
+- Search results organized by categories.
 
-## SearchNova Professional UI update
+### 2. AI Overview – Ollama
 
-The refreshed interface keeps the existing Django search workflow and adds a staff-only analytics page.
+- Local AI integration using Llama 3.2.
+- Generate AI answers based on search results.
+- AI-generated search summaries.
+- Database-based AI response caching.
+- Local AI processing without requiring Gemini API.
+- Reduced repeated AI processing through caching.
 
-- Home: `/`
-- Search results: `/search/?q=python`
-- Staff analytics: `/analytics/` (sign in with a Django staff/superuser account)
-- Django admin: `/admin/`
+### 3. Custom Web Crawler
 
-### Install and run on Windows
+- Crawl websites using configured seed URLs.
+- Extract page titles, descriptions, and HTML content.
+- Save crawled pages into the database.
+- Check robots.txt before crawling.
+- Domain restrictions for controlled crawling.
+- Store content hashes to identify page content changes.
 
-1. Open this folder in VS Code.
-2. Create/activate your virtual environment.
-3. Install dependencies: `pip install -r requirements.txt`
-4. Run: `python manage.py check`
-5. Start: `python manage.py runserver`
+### 4. Search Analytics Dashboard
 
-The existing SQLite database is included in this project archive. Keep a backup of `db.sqlite3` before making database changes.
+- Total searches.
+- Today's searches.
+- Unique search queries.
+- Searches with no results.
+- Top 10 search keywords.
+- Last 7 days search activity.
+- Search activity monitoring.
+
+### 5. Smart Search Suggestions
+
+- Automatic search suggestions.
+- Previous search history.
+- Recent search selection.
+- Delete previous search history.
+- Faster search navigation.
+
+### 6. Voice Search
+
+- Microphone-based search.
+- Speech-to-text functionality.
+- Automatically submit voice queries.
+- Browser-based speech recognition support.
+
+### 7. Advanced Search Capabilities
+
+- Search relevance scoring.
+- Title and description matching.
+- All, Tech, and News categories.
+- Search pagination (10 results per page).
+- Indexed page content hashing.
+- Database-backed search history.
+- Search result filtering.
+
+### 8. Django Administration
+
+- Manage indexed web pages.
+- View search records.
+- Manage crawler seed URLs.
+- Monitor indexed content.
+- Manage search engine database records.
+
+### 9. Responsive User Interface
+
+- Modern search engine interface.
+- Clean and professional design.
+- Responsive layouts.
+- User-friendly navigation.
+- Search-focused interface.
+
+---
+
+## 🛠️ Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| Python | Backend Programming |
+| Django | Web Framework |
+| SQLite | Database |
+| HTML5 | Page Structure |
+| CSS3 | Styling |
+| JavaScript | Frontend Interactions |
+| Bootstrap (if configured) | UI Components |
+| Ollama | Local AI Runtime |
+| Llama 3.2 | Language Model |
+| DuckDuckGo | External Search Fallback |
+| Web Speech API | Voice Search |
+| Git & GitHub | Version Control |
+
+---
+
+## 🏗️ Project Architecture
+
+```text
+                 USER
+                   |
+                   v
+             SEARCH INTERFACE
+                   |
+                   v
+             DJANGO APPLICATION
+                   |
+          +--------+---------+
+          |                  |
+          v                  v
+     LOCAL SEARCH       DUCKDUCKGO
+          |               FALLBACK
+          v                  |
+      SQLITE DATABASE <------+
+          |
+          v
+     SEARCH RESULTS
+          |
+          v
+       OLLAMA AI
+       LLAMA 3.2
+          |
+          v
+      AI OVERVIEW
+```
+
+### Web Crawling Workflow
+
+```text
+Seed URLs
+    |
+    v
+Web Crawler
+    |
+    v
+robots.txt Check
+    |
+    v
+HTML Extraction
+    |
+    v
+Content Processing
+    |
+    v
+Database Indexing
+    |
+    v
+Searchable Web Pages
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+SearchNova/
+│
+├── search/
+│   ├── management/
+│   │   └── commands/
+│   │       ├── crawl_sites.py
+│   │       └── load_demo_index.py
+│   │
+│   ├── migrations/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── searching.py
+│   ├── services.py
+│   ├── tests.py
+│   └── views.py
+│
+├── searchnova/
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+│
+├── static/
+├── templates/
+│
+├── .gitignore
+├── LICENSE
+├── README.md
+├── manage.py
+└── requirements.txt
+```
+
+---
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+
+- Python 3.10 or compatible version.
+- pip package manager.
+- Git.
+- Ollama for local AI functionality.
+- Windows 10/11 or compatible operating system.
+
+### Step 1: Clone Repository
+
+```bash
+git clone https://github.com/omkarmagdum56/searchnova.git
+```
+
+### Step 2: Open Project Directory
+
+```bash
+cd searchnova
+```
+
+### Step 3: Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+### Step 4: Activate Virtual Environment
+
+Windows CMD:
+
+```cmd
+venv\Scripts\activate
+```
+
+### Step 5: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 6: Apply Database Migrations
+
+```bash
+python manage.py migrate
+```
+
+### Step 7: Load Demo Data (Optional)
+
+```bash
+python manage.py load_demo_index
+```
+
+### Step 8: Create Django Superuser
+
+```bash
+python manage.py createsuperuser
+```
+
+### Step 9: Run Development Server
+
+```bash
+python manage.py runserver
+```
+
+Open the application:
+
+http://127.0.0.1:8000/
+
+---
+
+## 🤖 Ollama & Llama 3.2 Setup
+
+SearchNova uses Ollama to run AI models locally.
+
+### Step 1: Install Ollama
+
+Download Ollama:
+
+https://ollama.com/download
+
+### Step 2: Download Llama 3.2
+
+Open CMD:
+
+```bash
+ollama pull llama3.2
+```
+
+### Step 3: Start Ollama
+
+```bash
+ollama serve
+```
+
+If Ollama is already running as a background application, you may not need to start it manually.
+
+### Step 4: Verify Model
+
+```bash
+ollama list
+```
+
+### Step 5: Test Model
+
+```bash
+ollama run llama3.2
+```
+
+Enter a test prompt to verify that the model responds.
+
+**Note:** The exact Ollama model name and connection configuration must match the application's AI service settings.
+
+---
+
+## 🕷️ Web Crawling
+
+SearchNova includes custom Django management commands for crawling and indexing web pages.
+
+### Crawl Websites
+
+```bash
+python manage.py crawl_sites
+```
+
+### Load Demo Indexed Pages
+
+```bash
+python manage.py load_demo_index
+```
+
+Check available command options:
+
+```bash
+python manage.py help crawl_sites
+```
+
+Always respect website robots.txt rules, crawling restrictions, and server rate limits.
+
+---
+
+## 📊 Search Analytics
+
+The analytics dashboard provides information about:
+
+- Total search activity.
+- Daily search activity.
+- Unique search queries.
+- Searches returning no results.
+- Most frequently searched keywords.
+- Seven-day search trends.
+
+These insights help monitor search engine usage and understand user search behaviour.
+
+---
+
+## 🎤 Voice Search
+
+SearchNova provides microphone-based search through browser speech recognition.
+
+Voice search functionality depends on browser compatibility and microphone permissions.
+
+---
+
+## 🔐 Security & Configuration
+
+- Do not upload API keys, passwords, or secret credentials.
+- Keep local environment variables in `.env`.
+- Exclude virtual environments and local database files from Git.
+- Use appropriate Django production security settings before deployment.
+- Do not expose Django SECRET_KEY or DEBUG settings in production.
+
+---
+
+## 🔮 Future Enhancements
+
+- Advanced search ranking algorithms.
+- Better semantic search capabilities.
+- Search autocomplete improvements.
+- Enhanced AI answer quality.
+- More advanced crawler scheduling.
+- Improved indexing performance.
+- User authentication and personalized search.
+- Search filters and sorting improvements.
+- Production deployment and scalability.
+
+---
+
+## 🎯 Project Objectives
+
+1. Understand how search engines collect and index web content.
+2. Implement custom web crawling using Python.
+3. Develop a hybrid search engine using Django.
+4. Integrate locally hosted Artificial Intelligence.
+5. Implement search analytics and monitoring.
+6. Explore voice-based search functionality.
+7. Build a practical, real-world software development project.
+
+---
+
+## 👨‍💻 Developer
+
+**Onkar Magdum**
+
+Python & Django Developer
+
+GitHub: https://github.com/omkarmagdum56
+
+Project Repository:
+
+https://github.com/omkarmagdum56/searchnova
+
+---
+
+## 📜 License
+
+This project is distributed under the license included in this repository.
+
+---
+
+### SearchNova
+
+**Discover the Web. Search Smarter.**
+
+Built with Python, Django, and Local AI.
