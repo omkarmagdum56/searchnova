@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}SearchNova Analytics — Search intelligence{% endblock %}
+{% block content %}
+<section class="analytics-shell">
+  <div class="analytics-heading">
+    <div><span class="section-kicker">WORKSPACE INTELLIGENCE</span><h1>Search analytics</h1><p>A clear view of how your SearchNova index is being used.</p></div>
+    <div class="admin-label">● Staff dashboard</div>
+  </div>
+
+  <div class="analytics-grid">
+    <article class="analytics-card"><div class="label">TOTAL SEARCHES</div><div class="value">{{ total_searches }}</div><small>All recorded searches</small></article>
+    <article class="analytics-card"><div class="label">TODAY'S SEARCHES</div><div class="value">{{ today_searches }}</div><small>Activity today</small></article>
+    <article class="analytics-card"><div class="label">UNIQUE QUERIES</div><div class="value">{{ unique_queries }}</div><small>Distinct search terms</small></article>
+    <article class="analytics-card"><div class="label">NO-RESULT SEARCHES</div><div class="value">{{ no_result_searches }}</div><small>Queries without matches</small></article>
+  </div>
+
+  <div class="analytics-two">
+    <section class="analytics-panel">
+      <div class="panel-title">Daily search activity</div><div class="panel-subtitle">Search volume across the last seven days</div>
+      {% for day in daily_stats %}
+      <div class="chart-row"><div class="chart-label">{{ day.label }}</div><div class="chart-track"><div class="chart-bar" style="width:{{ day.percentage }}%"></div></div><div class="chart-value">{{ day.count }}</div></div>
+      {% empty %}<div class="empty-state-small">No search activity yet.</div>{% endfor %}
+    </section>
+    <section class="analytics-panel">
+      <div class="panel-title">Top 10 search terms</div><div class="panel-subtitle">Most frequently searched keywords</div>
+      {% for item in top_queries %}
+      <div class="keyword-item"><span class="keyword-name">{{ item.query }}</span><span class="count-badge">{{ item.total }} searches</span></div>
+      {% empty %}<div class="empty-state-small">No keywords recorded yet.</div>{% endfor %}
+    </section>
+  </div>
+
+  <div class="analytics-grid">
+    <article class="analytics-card"><div class="label">INDEXED PAGES</div><div class="value">{{ indexed_count }}</div><small>Pages available to search</small></article>
+    <article class="analytics-card"><div class="label">ACTIVE CRAWL SOURCES</div><div class="value">{{ seed_count }}</div><small>Enabled crawl seeds</small></article>
+  </div>
+
+  <section class="analytics-panel">
+    <div class="panel-title">Recent search history</div><div class="panel-subtitle">The latest ten queries recorded by SearchNova</div>
+    <div style="overflow-x:auto">
+      <table class="analytics-table">
+        <thead><tr><th>#</th><th>SEARCH TERM</th><th>RESULTS</th><th>DATE &amp; TIME</th><th>STATUS</th></tr></thead>
+        <tbody>
+        {% for item in recent_searches %}
+          <tr><td>{{ forloop.counter }}</td><td><strong>{{ item.query }}</strong></td><td>{{ item.results_count }}</td><td>{{ item.created_at|date:"d M Y, h:i A" }}</td><td>{% if item.results_count > 0 %}<span class="status-success">Results found</span>{% else %}<span class="status-empty">No results</span>{% endif %}</td></tr>
+        {% empty %}
+          <tr><td colspan="5" class="empty-state-small">No search history recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+{% endblock %}

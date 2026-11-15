@@ -1,0 +1,221 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8fc">
+  <meta name="description" content="SearchNova is a personal web search engine powered by Python and Django.">
+  <title>{% block title %}SearchNova — Discover the web{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'home' %}" aria-label="SearchNova home">
+      <span class="brand-mark"><span></span><span></span><span></span></span>
+      <span>Search<span class="brand-accent">Nova</span></span>
+    </a>
+    <nav class="top-links" aria-label="Main navigation">
+      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'results' %}?q=python">Explore</a>
+      {% if request.user.is_staff %}
+        <a href="{% url 'analytics' %}">Analytics</a>
+      {% endif %}
+      <a href="/admin/">Admin</a>
+      <a class="status-pill" href="{% url 'home' %}"><span></span> Index online</a>
+    </nav>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>© {% now "Y" %} SearchNova</span>
+      <span>A local web search engine project built with Django</span>
+    </div>
+  </footer>
+  
+</body>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsBox = document.getElementById('suggestionsBox');
+    const micBtn = document.getElementById('micBtn');
+
+    if (!searchInput) return;
+
+    let debounceTimer;
+
+    // --- 1. Recent Searches (LocalStorage) Functions ---
+    
+    // सर्च हिस्ट्री लोकल स्टोरेजमधून मिळवणे
+    function getRecentSearches() {
+        const history = localStorage.getItem('search_history');
+        return history ? JSON.parse(history) : [];
+    }
+
+    // नवीन सर्च शब्द लोकल स्टोरेजमध्ये सेव्ह करणे
+    function saveRecentSearch(query) {
+        if (!query || query.trim().length === 0) return;
+        let history = getRecentSearches();
+        query = query.trim();
+        
+        // आधीच असेल तर जुना काढून नवीन पुढे जोडणे (Duplicates टाळण्यासाठी)
+        history = history.filter(item => item.toLowerCase() !== query.toLowerCase());
+        history.unshift(query);
+        
+        // फक्त शेवटचे ५ सर्च सेव्ह करणे
+        if (history.length > 5) history.pop();
+        
+        localStorage.setItem('search_history', JSON.stringify(history));
+    }
+
+    // रीसेंट सर्च ड्रॉपडाऊनमध्ये दाखवणे
+    function showRecentSearches() {
+        const history = getRecentSearches();
+        if (!suggestionsBox || history.length === 0) return;
+
+        let html = '<div class="suggestion-header" style="padding: 6px 12px; font-size: 12px; color: #70757a; font-weight: bold; background: #f8f9fa;">Recent Searches</div>';
+        html += history.map(item => `
+            <div class="suggestion-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; cursor: pointer;" onclick="selectSuggestion('${item.replace(/'/g, "\\'")}')">
+                <span><span class="search-icon" style="margin-right: 8px; color: #70757a;">🕒</span> ${item}</span>
+                <span onclick="removeRecentSearch(event, '${item.replace(/'/g, "\\'")}')" style="color: #999; font-size: 14px; padding: 2px 6px;">✕</span>
+            </div>
+        `).join('');
+
+        suggestionsBox.innerHTML = html;
+        suggestionsBox.classList.remove('d-none');
+    }
+
+    // --- 2. Event Listeners ---
+
+    // इनपुटवर क्लिक केल्यावर जर बॉक्स रिकामी असेल तर रीसेंट सर्च दाखवा
+    searchInput.addEventListener('focus', function () {
+        if (this.value.trim() === '') {
+            showRecentSearches();
+        }
+    });
+
+    // सर्च फॉर्म सबमिट झाल्यावर क्वेरी सेव्ह करा
+    if (searchInput.form) {
+        searchInput.form.addEventListener('submit', function () {
+            saveRecentSearch(searchInput.value);
+        });
+    }
+
+    // इनपुट टाईप करताना (Auto-suggestions + Recent Searches fallback)
+    searchInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        const query = this.value.trim();
+
+        if (!suggestionsBox) return;
+
+        if (query.length === 0) {
+            showRecentSearches();
+            return;
+        }
+
+        if (query.length < 2) {
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            fetch(`/api/suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        suggestionsBox.innerHTML = data.suggestions.map(item => `
+                            <div class="suggestion-item" style="padding: 8px 12px; cursor: pointer;" onclick="selectSuggestion('${item.replace(/'/g, "\\'")}')">
+                                <span class="search-icon" style="margin-right: 8px; color: #70757a;">⌕</span> ${item}
+                            </div>
+                        `).join('');
+                        suggestionsBox.classList.remove('d-none');
+                    } else {
+                        suggestionsBox.innerHTML = '';
+                        suggestionsBox.classList.add('d-none');
+                    }
+                })
+                .catch(err => console.error('Error fetching suggestions:', err));
+        }, 300);
+    });
+
+    // ड्रॉपडाऊन बाहेर क्लिक केल्यावर बंद करणे
+    document.addEventListener('click', function (e) {
+        if (!searchInput.contains(e.target) && suggestionsBox && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.classList.add('d-none');
+        }
+    });
+
+    // --- 3. Voice Search Logic ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (micBtn && SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        micBtn.addEventListener('click', function () {
+            try {
+                recognition.start();
+                micBtn.style.opacity = '0.5';
+                searchInput.placeholder = "Listening... Speak now...";
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        recognition.onresult = function (event) {
+            const speechToText = event.results[0][0].transcript;
+            searchInput.value = speechToText;
+            micBtn.style.opacity = '1';
+            searchInput.placeholder = "Search the web or local index...";
+            saveRecentSearch(speechToText);
+            searchInput.form.submit();
+        };
+
+        recognition.onerror = function () {
+            micBtn.style.opacity = '1';
+            searchInput.placeholder = "Search the web or local index...";
+        };
+
+        recognition.onend = function () {
+            micBtn.style.opacity = '1';
+            searchInput.placeholder = "Search the web or local index...";
+        };
+    } else if (micBtn) {
+        micBtn.style.display = 'none';
+    }
+});
+
+// सजेशन निवडल्यावर फॉर्म सबमिट करणे
+function selectSuggestion(text) {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = text;
+        const history = localStorage.getItem('search_history');
+        let list = history ? JSON.parse(history) : [];
+        list = list.filter(item => item.toLowerCase() !== text.toLowerCase());
+        list.unshift(text);
+        if (list.length > 5) list.pop();
+        localStorage.setItem('search_history', JSON.stringify(list));
+        
+        searchInput.form.submit();
+    }
+}
+
+// रीसेंट सर्चमधून एखादा विशिष्ट आयटम डिलीट करणे
+function removeRecentSearch(event, text) {
+    event.stopPropagation(); // पेरेंट div चे क्लिक थांबवण्यासाठी
+    let history = localStorage.getItem('search_history');
+    if (history) {
+        let list = JSON.parse(history);
+        list = list.filter(item => item !== text);
+        localStorage.setItem('search_history', JSON.stringify(list));
+    }
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.focus();
+}
+</script>
+</html>

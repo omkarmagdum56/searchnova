@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}SearchNova — A clearer way to explore the web{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow"><span class="eyebrow-dot"></span> AN INDEPENDENT WEB DISCOVERY WORKSPACE</div>
+  <h1>Make the web<br><span>make sense.</span></h1>
+  <p class="hero-copy">Search across your curated index and the wider web, all from one focused workspace.</p>
+
+  <form class="search-form hero-search" action="{% url 'results' %}" method="get" role="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+    <input type="search" id="searchInput" name="q" placeholder="What are you looking for today?" aria-label="Search the indexed web" required maxlength="300" autocomplete="off" autofocus>
+    <button type="button" id="micBtn" title="Search by voice" aria-label="Search by voice" style="background:transparent;border:0;padding:7px;cursor:pointer;display:flex;align-items:center">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="#718197"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+    </button>
+    <div id="suggestionsBox" class="suggestions-dropdown d-none"></div>
+    <button type="submit">Search <span>↗</span></button>
+  </form>
+
+  <div class="popular"><span>Explore a topic</span>
+    <a href="{% url 'results' %}?q=python">Python</a>
+    <a href="{% url 'results' %}?q=django">Django</a>
+    <a href="{% url 'results' %}?q=technology">Technology</a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><span class="stat-icon blue">⌘</span><div><strong>{{ indexed_count }}</strong><span>Pages indexed</span></div></div>
+    <div class="stat-card"><span class="stat-icon green">◎</span><div><strong>{{ seed_count }}</strong><span>Active crawl sources</span></div></div>
+    <div class="stat-card"><span class="stat-icon purple">↗</span><div><strong>Hybrid</strong><span>Local + live discovery</span></div></div>
+  </div>
+</section>
+
+<section class="how-section">
+  <div class="section-heading">
+    <div><span class="section-kicker">BUILT FOR DISCOVERY</span><h2>A search workspace that stays useful.</h2></div>
+    <p>Focused tools. Clear results. Your index.</p>
+  </div>
+  <div class="feature-grid">
+    <article class="feature-card"><div class="feature-icon lavender">⌕</div><h3>Search with context</h3><p>Explore pages using relevant matches from titles, descriptions and indexed content, with live web fallback.</p></article>
+    <article class="feature-card"><div class="feature-icon sky">▤</div><h3>Curate your own index</h3><p>Add permitted public websites as crawl sources and build a searchable collection around your interests.</p></article>
+    <article class="feature-card"><div class="feature-icon mint">✦</div><h3>Understand the results</h3><p>Get a concise AI Overview when supporting search results are available, alongside the original sources.</p></article>
+  </div>
+  <div class="setup-note"><span class="note-icon">i</span><div>
+    <strong>{% if has_index %}Your search index is ready to grow{% else %}Your search index is waiting for its first pages{% endif %}</strong>
+    <p>Load sample content with <code>python manage.py load_demo_index</code>, or add a public URL in <a href="/admin/">Admin → Crawl seeds</a> and run <code>python manage.py crawl_sites --max-pages 10</code>.</p>
+  </div></div>
+</section>
+{% endblock %}

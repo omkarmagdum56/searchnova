@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}{% if query %}{{ query }} — SearchNova{% else %}Search Results — SearchNova{% endif %}{% endblock %}
+
+{% block content %}
+<section class="results-shell">
+  <!-- Top Search Bar -->
+ <form class="search-bar-wrapper" action="{% url 'results' %}" method="get" role="search">
+  <div class="search-input-group position-relative flex-grow-1">
+    <!-- Magnifying Glass Icon -->
+    <svg class="search-icon-svg" viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; fill: none; stroke: #70757a; stroke-width: 2;">
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="m16 16 4 4"></path>
+    </svg>
+    
+    <!-- Search Input -->
+    <input type="search" id="searchInput" name="q" value="{{ query }}" autocomplete="off" placeholder="Search the web or local index..." aria-label="Search query" required maxlength="300">
+    
+    <!-- 🎙️ Voice Search Microphone Icon Button -->
+    <button type="button" id="micBtn" title="Search by voice" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="#5f6368">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+
+    <!-- Suggestions Dropdown Box -->
+    <div id="suggestionsBox" class="suggestions-dropdown d-none"></div>
+  </div>
+
+  <button type="submit" class="search-submit-btn">Search <span>↗</span></button>
+</form>
+
+<!-- Search Categories Tabs Bar -->
+  {% if query %}
+  <div class="category-tabs-bar mb-4">
+    <ul class="nav nav-pills gap-2">
+      <li class="nav-item">
+        <a class="nav-link rounded-pill px-3 py-1 {% if current_category == 'all' %}active bg-primary text-white{% else %}bg-light text-dark{% endif %}" 
+            href="{% url 'results' %}?q={{ query }}&category=all">All</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link rounded-pill px-3 py-1 {% if current_category == 'tech' %}active bg-primary text-white{% else %}bg-light text-dark{% endif %}" 
+            href="{% url 'results' %}?q={{ query }}&category=tech">Tech</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link rounded-pill px-3 py-1 {% if current_category == 'news' %}active bg-primary text-white{% else %}bg-light text-dark{% endif %}" 
+            href="{% url 'results' %}?q={{ query }}&category=news">News</a>
+      </li>
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="results-layout">
+    <section class="results-main">
+      <!-- Search Meta Info (Fixed wrapper) -->
+      <div class="results-meta mb-4">
+        <span class="section-kicker">SEARCH RESULTS</span>
+        <h1>{% if query %}Results for <span>“{{ query }}”</span>{% else %}Start your search{% endif %}</h1>
+        
+        {% if query %}
+          <p>
+            {{ result_count }} result{{ result_count|pluralize }} found 
+            {% if source_type %}
+              · <strong class="badge-source">{{ source_type }}</strong>
+            {% endif %}
+            · {{ indexed_count }} indexed pages
+          </p>
+        {% endif %}
+      </div>
+
+      {% if not query %}
+        <!-- Empty State (No query entered) -->
+        <div class="empty-state">
+          <div class="empty-symbol">⌕</div>
+          <h2>What would you like to discover?</h2>
+          <p>Type a keyword in the search box above to explore indexed pages or live web results.</p>
+        </div>
+{% elif items %}
+        {% if ai_overview %}
+        <section class="ai-overview-card" aria-label="AI Overview">
+          <div style="font-weight:700;margin-bottom:10px;color:#efb487">✦ SearchNova AI Overview</div>
+          <p style="margin:0">{{ ai_overview }}</p>
+        </section>
+        {% endif %}
+        <!-- Search Results List -->
+        <!-- Search Results List -->
+        {% for item in items %}
+        <article class="result-card">
+          <!-- URL & Counter -->
+          <div class="result-url">
+            <span class="favicon">{{ forloop.counter }}</span>
+            <span>
+              {% if item.page.url %}
+                {{ item.page.url }}
+              {% elif item.url %}
+                {{ item.url }}
+              {% endif %}
+            </span>
+          </div>
+
+          <!-- Title -->
+          <h2>
+            <a href="{% if item.page.url %}{{ item.page.url }}{% else %}{{ item.url }}{% endif %}" target="_blank" rel="noopener noreferrer">
+              {% if item.page.title %}
+                {{ item.page.title }}
+              {% elif item.title %}
+                {{ item.title }}
+              {% else %}
+                {% if item.page.url %}{{ item.page.url }}{% else %}{{ item.url }}{% endif %}
+              {% endif %}
+            </a>
+          </h2>
+
+          <!-- Description / Content Snippet -->
+          <p class="result-description">
+            {% if item.page.description %}
+              {{ item.page.description|truncatechars:260 }}
+            {% elif item.page.body_text %}
+              {{ item.page.body_text|truncatechars:260 }}
+            {% elif item.description %}
+              {{ item.description|truncatechars:260 }}
+            {% else %}
+              No description available for this result.
+            {% endif %}
+          </p>
+
+          <!-- Result Footer Source Info -->
+          <div class="result-foot">
+            <span>
+              {% if item.source %}
+                {{ item.source }}
+              {% elif item.page.crawled_at %}
+                SearchNova index
+              {% else %}
+                Web Search
+              {% endif %}
+            </span>
+
+            {% if item.page.crawled_at %}
+              <span>Indexed {{ item.page.crawled_at|date:"M j, Y" }}</span>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+
+        <!-- ✅ PAGINATION (हा भाग आता अचूकपणे लूपच्या बाहेर आणि खाली आहे) -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Search results navigation" class="my-4">
+          <ul class="pagination justify-content-center align-items-center gap-2" style="list-style: none; display: flex; padding: 0;">
+            
+            <!-- Previous Button -->
+            {% if page_obj.has_previous %}
+              <li>
+                <a class="btn btn-outline-primary rounded-pill px-3 py-1" href="?q={{ query }}&category={{ current_category }}&page={{ page_obj.previous_page_number }}">
+                  ← Previous
+                </a>
+              </li>
+            {% else %}
+              <li>
+                <span class="btn btn-outline-secondary rounded-pill px-3 py-1 disabled" style="opacity: 0.5; pointer-events: none;">← Previous</span>
+              </li>
+            {% endif %}
+
+            <!-- Page Indicator -->
+            <li class="text-muted px-2" style="font-size: 14px;">
+              Page <strong>{{ page_obj.number }}</strong> of {{ page_obj.paginator.num_pages }}
+            </li>
+
+            <!-- Next Button -->
+            {% if page_obj.has_next %}
+              <li>
+                <a class="btn btn-outline-primary rounded-pill px-3 py-1" href="?q={{ query }}&category={{ current_category }}&page={{ page_obj.next_page_number }}">
+                  Next →
+                </a>
+              </li>
+            {% else %}
+              <li>
+                <span class="btn btn-outline-secondary rounded-pill px-3 py-1 disabled" style="opacity: 0.5; pointer-events: none;">Next →</span>
+              </li>
+            {% endif %}
+
+          </ul>
+        </nav>
+        {% endif %}
+
+      {% else %}
+        <!-- No Matching Results -->
+        <div class="empty-state">
+          <div class="empty-symbol">⌕</div>
+          <h2>No matching pages found</h2>
+          <p>Try a shorter or different keyword. If your index is empty, load starter data or add a seed URL in Admin.</p>
+          <p><code>python manage.py load_demo_index</code></p>
+          <a class="primary-link" href="{% url 'home' %}">Back to home</a>
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- Sidebar Info -->
+    <aside class="results-sidebar">
+      <div class="side-card">
+        <div class="side-icon">✦</div>
+        <h3>About SearchNova</h3>
+        <p>A hybrid search engine built with Python and Django. It searches local crawled pages and live web results seamlessly.</p>
+      </div>
+
+      <div class="side-card side-tip">
+        <h3>Improve your index</h3>
+        <ol>
+          <li>Add a public URL in Admin → Crawl seeds.</li>
+          <li>Run the crawler command in terminal.</li>
+          <li>Search again with related keywords.</li>
+        </ol>
+        <a href="/admin/">Open admin ↗</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}
